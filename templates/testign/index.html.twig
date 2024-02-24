@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Testign index{% endblock %}
+
+{% block body %}
+    <h1>Testign index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for testign in testigns %}
+            <tr>
+                <td>{{ testign.id }}</td>
+                <td>{{ testign.name }}</td>
+                <td>{{ testign.description }}</td>
+                <td>
+                    <a href="{{ path('app_testign_show', {'id': testign.id}) }}">show</a>
+                    <a href="{{ path('app_testign_edit', {'id': testign.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_testign_new') }}">Create new</a>
+{% endblock %}
