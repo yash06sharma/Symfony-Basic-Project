@@ -11,8 +11,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 
-
-
 class CrudFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -39,22 +37,22 @@ class CrudFormType extends AbstractType
                 'attr' => array('class' => 'form-control'),
             ])
 
-        ->add('cource', ChoiceType::class, 
-        [
-            'label' => 'Select Course',
-            'choices' => [
-                'PHP' => 'PHP',
-                'Laravel' => 'Laravel',
-                'Angular' => 'Angular',
-                'Symfony' => 'Symfony',
-            ],
-            'expanded' => true,
-            'multiple' => true,
-            'attr' => [
-                'class' => 'input-group form-check-input',
-            ],
-            'data' => ['PHP'],
-        ])
+            ->add('cource', ChoiceType::class, 
+            [
+                'label' => 'Select Course',
+                'choices' => [
+                    'PHP' => 'PHP',
+                    'Laravel' => 'Laravel',
+                    'Angular' => 'Angular',
+                    'Symfony' => 'Symfony',
+                ],
+                'expanded' => true,
+                'multiple' => true,
+                'attr' => [
+                    'class' => 'input-group form-check-input',
+                ],
+                'data' => ['PHP'],
+            ])
 
             ->add('city', ChoiceType::class, [
                 'required' => true,
@@ -74,9 +72,7 @@ class CrudFormType extends AbstractType
             array('data_class' => null,'required' => true),
             [
                 'attr' => array('class' => 'form-control'),
-            ])
-            
-            ;
+            ]);
 
     }
 

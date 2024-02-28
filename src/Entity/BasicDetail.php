@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\BasicDetailRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\UX\Turbo\Attribute\Broadcast;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: BasicDetailRepository::class)]
 #[Broadcast]
@@ -15,16 +17,19 @@ class BasicDetail
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'BasicDetailID')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Database $databaseUserId = null;
+    #[ORM\ManyToOne(targetEntity:Database::class)]
+    #[ORM\JoinColumn(name:'database_user_id_id', referencedColumnName: 'id',nullable: false)]
+    private $databaseUserId = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotNull]
     private ?string $state = null;
 
+    #[Assert\NotNull]
     #[ORM\Column(length: 255)]
     private ?string $dist = null;
 
+    #[Assert\NotNull]
     #[ORM\Column(length: 255)]
     private ?string $zip = null;
 
@@ -33,12 +38,12 @@ class BasicDetail
         return $this->id;
     }
 
-    public function getDatabaseUserId(): ?Database
+    public function getDatabaseUserId()
     {
         return $this->databaseUserId;
     }
 
-    public function setDatabaseUserId(?Database $databaseUserId): static
+    public function setDatabaseUserId(?Database $databaseUserId): self
     {
         $this->databaseUserId = $databaseUserId;
 

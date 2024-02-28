@@ -5,7 +5,37 @@
 {% endblock %}
 
 {% block body %}
+    {# {{ include('CRUD_TEMP/createForm.html.twig', {'button_label': 'Update'}) }} #}
+{{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div class="m-1">
+                Add Address:
+                <hr/>
+        <div id="basiFormShow"></div>
+        <hr/>
+        <button tyoe="submit" class="btn btn-primary mt-2">{{ button_label|default('Update') }}</button>
+        {{ form_end(form) }}
 
-    {{ include('CRUD_TEMP/createForm.html.twig', {'button_label': 'Update'}) }}
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            var formIndex = 1;
+            {% for item in basicDetail %}
+        $.get('{{ path('get_form') }}', function (response) {
+                $('#basiFormShow').append("<div id='form_" + formIndex + "'>" + "<h5>Address: " + formIndex + "</h5>" + response + "<input class='form-control' id='arrayID_" + formIndex + "' name='basic_detail_form[id][" + formIndex + "]' type='hidden' value='{{ item.id }}'>" + "</div>");
+
+                                var data = "#form_" + formIndex + " #basic_detail_form_state";
+                                var data1 = "#form_" + formIndex + " #basic_detail_form_dist";
+                                var data2 = "#form_" + formIndex + " #basic_detail_form_zip";
+                                $(data).attr('name', 'basic_detail_form[state][' + formIndex + ']').val('{{ item.state }}');    
+                                $(data1).attr('name', 'basic_detail_form[dist][' + formIndex + ']').val('{{ item.dist }}');
+                                $(data2).attr('name', 'basic_detail_form[zip][' + formIndex + ']').val('{{ item.zip }}');
+                formIndex++;
+                        });
+                {% endfor %}
+      
+        });
+
+</script>
 
 {% endblock %}

@@ -1,27 +1,48 @@
 {% extends 'CRUD_TEMP/layout.html.twig' %}
-
-
-{% block title %}CRUD Form
-{% endblock %}
-
-
+{% block title %}CRUD Form{% endblock %}
 {% block body %}
-<div>
-<button type="button" class="btn btn-light btn-sm">Add More+</button>
-</div>
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div class="m-1">
+                Add Address:
+                <button type="button" class="btn btn-light btn-sm" id="addMoreButton">Add More+</button>
+                <hr/>
+        <div id="basiFormShow"></div>
+        <hr/>
+        <button tyoe="submit" class="btn btn-primary mt-2">{{ button_label|default('Register') }}</button>
+        {{ form_end(form) }}
 
-{{ form_start(form) }}
-    {{ form_widget(form) }} 
 
-    <button class="btn btn-primary">{{ button_label|default('Register') }}</button>
-{{ form_end(form) }}
+<script type="text/javascript">
+        $(document).ready(function () {
+        var formIndex = 0;
+        const container = document.getElementById('basiFormShow');
+                $('#addMoreButton').click(function () {
+                        $.get('{{ path('get_form') }}', function (response) {
+                        $('#basiFormShow').append("<div id='form_" + formIndex + "'>" + "<h5>Address: " + formIndex + "</h5>" + response + "<button class='btn btn-warning btn-sm delete-button'>Delete</button>" + "</div>");
 
-<div class="row">
+                                var data = "#form_" + formIndex + " #basic_detail_form_state";
+                                var data1 = "#form_" + formIndex + " #basic_detail_form_dist";
+                                var data2 = "#form_" + formIndex + " #basic_detail_form_zip";
+                                $(data).attr('name', 'basic_detail_form[state][' + formIndex + ']');
+                                $(data1).attr('name', 'basic_detail_form[dist][' + formIndex + ']');
+                                $(data2).attr('name', 'basic_detail_form[zip][' + formIndex + ']');
+                        });
+                formIndex++;
+                });
 
+                $('#basiFormShow').on('click', '.delete-button', function () {
+                var formIndex = $(this).parent().attr('id').split('_')[1];
 
-<div class="col-sm-12">
+                deleForm(formIndex);
+                });
+                function deleForm(formIndex) {
+                console.log("Deleting form with index: " + formIndex);
+                let data = "#form_" + formIndex; // Add # to indicate ID selector
+                $(data).remove();
+                }
+        });
 
-</div>
-</div>
+</script>
 
 {% endblock %}

@@ -35,10 +35,7 @@ class Database
         minMessage: 'The number must be only {{ limit }} characters long',
         maxMessage: 'The number must be only {{ limit }} characters'
     )]
-    // #[Assert\Regex(
-    //     pattern: "/^([+]\d{2})?\d{10}$/",
-    //     message: "Invalid mobile number format"
-    // )]
+
     private ?string $mobile;
 
     #[Assert\NotNull]
@@ -53,8 +50,9 @@ class Database
     #[Assert\NotNull]
     private ?string $image;
 
-    #[ORM\OneToMany(targetEntity: BasicDetail::class, mappedBy: 'databaseUserId')]
-    private Collection $BasicDetailID;
+    #[ORM\OneToMany(targetEntity: BasicDetail::class, mappedBy: 'databaseUserId',cascade:['remove'], fetch:'EAGER')]
+    private $BasicDetailID;
+
     public function __construct()
     {
         $this->BasicDetailID = new ArrayCollection();
@@ -145,6 +143,9 @@ class Database
         return $this->BasicDetailID;
     }
 
+    /**
+     * @return Collection<int, BasicDetail>
+     */
     public function addBasicDetailID(BasicDetail $basicDetailID): static
     {
         if (!$this->BasicDetailID->contains($basicDetailID)) {
@@ -155,6 +156,9 @@ class Database
         return $this;
     }
 
+     /**
+     * @return Collection<int, BasicDetail>
+     */
     public function removeBasicDetailID(BasicDetail $basicDetailID): static
     {
         if ($this->BasicDetailID->removeElement($basicDetailID)) {
@@ -166,11 +170,5 @@ class Database
 
         return $this;
     }
-
-
-
-
-
-
 
 }
