@@ -14,6 +14,13 @@ use App\Repository\BasicDetailRepository;
 use App\Repository\DatabaseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\Event\ProductEventSubscriber;
+use App\Event\ProductCreateEvent;
+use App\Event\ProductDeleteEvent;
+use App\Event\ProductUpdateEvent;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+
 
 class CRUDController extends AbstractController
 {
@@ -22,11 +29,16 @@ class CRUDController extends AbstractController
      */
     private $em;
     /**
+     * EventDispatcherInterface $eventDispatcher
+     */
+    private $eventDispatcher;
+    /**
      * To initialization
      */
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher)
     {
         $this->em = $entityManager;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -66,15 +78,26 @@ class CRUDController extends AbstractController
                 $database->setImage($newFilename);
             }
 
+            //   try {
+            //     $brochureFile->move(
+            //         $this->getParameter('brochures_directory'),
+            //         $newFilename
+            //     );
+            // } catch (FileException $e) {
+            // }
+
+
             $basicDetailData = $request->request->all('basic_detail_form');
-            $length = count($basicDetailData['state']);
-            for ($i = 0; $i < $length; $i++) {
-                $basicdetail = new BasicDetail();
-                $basicdetail->setState($basicDetailData['state'][$i + 1]); // Adding 1 because array keys are 1-indexed
-                $basicdetail->setDist($basicDetailData['dist'][$i + 1]);
-                $basicdetail->setZip($basicDetailData['zip'][$i + 1]);
-                $basicdetail->setDatabaseUserId($database);
-                $this->em->persist($basicdetail);
+            if($basicDetailData){
+                $length = count($basicDetailData['state']);
+                for ($i = 0; $i < $length; $i++) {
+                    $basicdetail = new BasicDetail();
+                    $basicdetail->setState($basicDetailData['state'][$i + 1]);
+                    $basicdetail->setDist($basicDetailData['dist'][$i + 1]);
+                    $basicdetail->setZip($basicDetailData['zip'][$i + 1]);
+                    $basicdetail->setDatabaseUserId($database);
+                    $this->em->persist($basicdetail);
+                }
             }
             $this->em->persist($database);
             try {
@@ -83,6 +106,15 @@ class CRUDController extends AbstractController
                 dump($e->getMessage());
                 dump($e->getTrace()); 
             }
+            //-----------------------Event & Subscribe---------------------
+            $event = new ProductCreateEvent();
+            $this->eventDispatcher->addSubscriber(new ProductEventSubscriber());
+            $this->eventDispatcher->dispatch($event, ProductCreateEvent::NAME);
+
+            //-----------------------End Event $ Subscriner----------------------
+
+
+
             return $this->redirectToRoute('app_crud_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -148,6 +180,12 @@ class CRUDController extends AbstractController
                 dump($e->getMessage());
                 dump($e->getTrace());
             }
+            //-----------------------Event & Subscribe---------------------
+
+                $event = new ProductUpdateEvent();
+                $this->eventDispatcher->addSubscriber(new ProductEventSubscriber());
+                $this->eventDispatcher->dispatch($event, ProductUpdateEvent::NAME);
+            //-----------------------End Event & Subscribe---------------------
 
             return $this->redirectToRoute('app_crud_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -177,6 +215,13 @@ class CRUDController extends AbstractController
                 dump($e->getMessage());
                 dump($e->getTrace());
             }
+                 //-----------------------Event & Subscribe---------------------
+         
+                $event = new ProductDeleteEvent();
+                $this->eventDispatcher->addSubscriber(new ProductEventSubscriber());
+                $this->eventDispatcher->dispatch($event, ProductDeleteEvent::NAME);
+                  //-----------------------End Event & Subscribe---------------------
+      
             return $this->redirectToRoute('app_crud_index', [], Response::HTTP_SEE_OTHER);
         } else {
             return new Response("Entity with ID $id not found", Response::HTTP_NOT_FOUND);

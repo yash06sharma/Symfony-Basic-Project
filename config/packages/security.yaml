@@ -1,21 +1,57 @@
 security:
+    enable_authenticator_manager: true
+    access_decision_manager:
+        strategy: unanimous
+        allow_if_all_abstain: false
+
+
+
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
     firewalls:
+        login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            logout:
+                path: app/logout
+               
+
+        api:
+            pattern:   ^/api
+            stateless: true
+            jwt: ~
+            entry_point: jwt
+        
+        refresh_token:
+            pattern:  ^/api/token/refresh
+            stateless: true
+            refresh_jwt:
+                check_path: /api/token/refresh
+        
+
+     
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-            provider: users_in_memory
-
+            provider: app_user_provider
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
-
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
@@ -24,6 +60,9 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS  }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS  }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:
@@ -37,3 +76,14 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+
+
+
+#  api:
+#             pattern:   ^/api
+#             stateless: true
+#             jwt: ~
+#             entry_point: jwt
+#             refresh_jwt:
+#                 check_path: jwt_refresh
+            
